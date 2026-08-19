@@ -1,0 +1,10 @@
+{
+  "expected_rule_ids": [
+    "AUTHZ",
+    "SECRET",
+    "SQL",
+    "TLS",
+    "SHELL",
+    "DEBUG"
+  ]
+}

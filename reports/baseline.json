@@ -1,0 +1,74 @@
+{
+  "input": "sample_data/pr_diff.txt",
+  "finding_count": 6,
+  "high_risk_count": 5,
+  "evaluation": {
+    "tp": 6,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "findings": [
+    {
+      "rule_id": "SECRET",
+      "title": "Potential hard-coded secret",
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "line": 8,
+      "evidence": "api_key = \"abcdefghijklmnop\"",
+      "confidence": 0.96,
+      "risk_score": 1.0
+    },
+    {
+      "rule_id": "AUTHZ",
+      "title": "Authorization control removed",
+      "severity": "critical",
+      "cwe": "CWE-862",
+      "line": 6,
+      "evidence": "@require_admin",
+      "confidence": 0.94,
+      "risk_score": 1.0
+    },
+    {
+      "rule_id": "TLS",
+      "title": "TLS certificate verification disabled",
+      "severity": "high",
+      "cwe": "CWE-295",
+      "line": 10,
+      "evidence": "response = requests.get(\"https://internal/api\", verify=False)",
+      "confidence": 0.95,
+      "risk_score": 0.784
+    },
+    {
+      "rule_id": "SHELL",
+      "title": "Shell command execution enabled",
+      "severity": "high",
+      "cwe": "CWE-78",
+      "line": 11,
+      "evidence": "subprocess.run(\"backup --all\", shell=True)",
+      "confidence": 0.93,
+      "risk_score": 0.77
+    },
+    {
+      "rule_id": "SQL",
+      "title": "String-built SQL query",
+      "severity": "high",
+      "cwe": "CWE-89",
+      "line": 9,
+      "evidence": "query = f\"SELECT * FROM customers WHERE id = {user_id}\"",
+      "confidence": 0.86,
+      "risk_score": 0.769
+    },
+    {
+      "rule_id": "DEBUG",
+      "title": "Debug mode enabled",
+      "severity": "medium",
+      "cwe": "CWE-489",
+      "line": 12,
+      "evidence": "debug = True",
+      "confidence": 0.88,
+      "risk_score": 0.446
+    }
+  ]
+}

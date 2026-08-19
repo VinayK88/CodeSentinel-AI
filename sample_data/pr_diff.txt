@@ -1,0 +1,13 @@
+diff --git a/app.py b/app.py
+index 1111111..2222222 100644
+--- a/app.py
++++ b/app.py
+@@ -1,6 +1,9 @@
+-@require_admin
+ def export_customer_data(user_id):
++    api_key = "abcdefghijklmnop"
++    query = f"SELECT * FROM customers WHERE id = {user_id}"
++    response = requests.get("https://internal/api", verify=False)
++    subprocess.run("backup --all", shell=True)
++    debug = True
+     return query

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codesentinel-ai"
+version = "0.1.0"
+description = "Deterministic PR security analysis, finding validation, and remediation lifecycle measurement."
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+[project.scripts]
+codesentinel = "codesentinel.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
