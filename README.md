@@ -2,56 +2,77 @@
 
 # CodeSentinel AI
 
-### AI-Native Application Security · PR Security Review · CWE Mapping · Finding Validation
+### AI-Native Application Security for Secure Code Review
+
+**Turn code changes into evidence-backed security decisions — then follow findings through validation, developer action, remediation, and verified closure.**
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![CI](https://github.com/VinayK88/CodeSentinel-AI/actions/workflows/tests.yml/badge.svg)](https://github.com/VinayK88/CodeSentinel-AI/actions/workflows/tests.yml)
-![AppSec](https://img.shields.io/badge/AppSec-PR%20Security%20Review-CB2431)
-![CWE](https://img.shields.io/badge/CWE-Mapped-8957E5)
+![AppSec](https://img.shields.io/badge/AppSec-Secure%20Code%20Review-CB2431)
+![CWE](https://img.shields.io/badge/CWE-Evidence%20Mapped-8957E5)
+![Lifecycle](https://img.shields.io/badge/Lifecycle-Detect%20→%20Verify-238636)
 
-**diff → detect → validate → prioritize → remediate → verify**
+`diff → detect → validate → prioritize → remediate → verify`
 
 </div>
 
-<p align="center"><img src="assets/architecture.svg" width="100%" alt="CodeSentinel architecture" /></p>
-<p align="center"><img src="assets/dashboard-preview.svg" width="100%" alt="CodeSentinel dashboard preview" /></p>
+<p align="center"><img src="assets/product-dashboard.svg" width="100%" alt="CodeSentinel AI product dashboard" /></p>
+<p align="center"><sub><b>Product visualization.</b> UI values are illustrative; measured public-replay metrics are reported below.</sub></p>
 
-## Why this project exists
+## The product idea
 
-Security scanners often stop at producing findings. **CodeSentinel AI** models the full application-security decision loop around a pull request: identify risky changes, map evidence to CWE, suppress duplicates/noise, prioritize by exploitability and change context, capture developer disposition, and verify remediation.
+Most scanners end at **“finding detected.”** CodeSentinel models the decision system around that finding: what changed, what evidence supports the alert, which CWE applies, whether the result survives validation, how risky it is in context, whether a developer accepts the fix, and whether remediation is actually verified.
 
-The public demo is intentionally deterministic and offline. It uses synthetic diffs and does **not** claim production efficacy.
+<table>
+<tr>
+<td width="25%" valign="top"><b>01 · Detect</b><br/><sub>Explainable checks over PR diffs for secrets, authz weakening, SQL construction, unsafe shell use, TLS bypass and debug exposure.</sub></td>
+<td width="25%" valign="top"><b>02 · Validate</b><br/><sub>Evidence, confidence, duplicate suppression and contextual prioritization reduce “scanner says so” noise.</sub></td>
+<td width="25%" valign="top"><b>03 · Decide</b><br/><sub>Risk score + CWE + code evidence create a reviewable security decision rather than a black-box label.</sub></td>
+<td width="25%" valign="top"><b>04 · Close</b><br/><sub>Lifecycle state connects developer disposition, remediation and re-verification.</sub></td>
+</tr>
+</table>
+
+## Architecture
+
+<p align="center"><img src="assets/architecture-premium.svg" width="100%" alt="CodeSentinel AI architecture" /></p>
+
+The public implementation keeps **authorization and security policy deterministic** while leaving room for ML/LLM validation behind explicit evidence contracts. Learned scores inform prioritization; they do not silently grant security-sensitive actions.
+
+## Measured synthetic replay
+
+The checked-in replay uses deterministic synthetic PR diffs so the entire evaluation can run offline and be reproduced in CI.
+
+| Metric | Result |
+| --- | ---: |
+| Labeled finding families detected | **6 / 6** |
+| Precision | **1.00** |
+| Recall | **1.00** |
+| False positives | **0** |
+| Critical / high findings | **5 / 6** |
+| Distinct CWE mappings | **6** |
+
+> These numbers validate the **implementation and evaluation mechanics on the included synthetic fixture**. They are not claims of production AppSec efficacy.
+
+## Detection coverage
+
+| Signal | Example evidence | CWE |
+| --- | --- | --- |
+| Hard-coded secret | key / token introduced in code | CWE-798 |
+| Authorization weakening | authz control removed in diff | CWE-862 |
+| Unsafe SQL construction | string-built query path | CWE-89 |
+| Shell execution | `shell=True` / command execution | CWE-78 |
+| TLS verification bypass | `verify=False` | CWE-295 |
+| Debug exposure | application debug enabled | CWE-489 |
 
 ## 60-second reviewer path
 
-1. Inspect the architecture and sample dashboard above.
-2. Run `codesentinel --input sample_data/pr_diff.txt`.
-3. Review `src/codesentinel/rules.py` for explainable security checks.
-4. Review `src/codesentinel/validator.py` for dedupe/confidence/risk logic.
-5. Run the tests and inspect `reports/baseline.json`.
+1. **Scan the product view and architecture above.**
+2. Open [`src/codesentinel/rules.py`](src/codesentinel/rules.py) for explainable AppSec checks.
+3. Open [`src/codesentinel/validator.py`](src/codesentinel/validator.py) for confidence, dedupe and risk logic.
+4. Inspect [`reports/baseline.json`](reports/baseline.json) for the reproducible evaluation output.
+5. Run the Streamlit dashboard for the analyst-facing workflow.
 
-## What it detects
-
-| Signal | Example | CWE |
-| --- | --- | --- |
-| Secret exposure | API keys / bearer tokens added in code | CWE-798 |
-| Command execution risk | `shell=True`, dynamic execution | CWE-78 / CWE-95 |
-| SQL construction risk | string-built query paths | CWE-89 |
-| TLS verification disabled | `verify=False` | CWE-295 |
-| Authorization weakening | removal of authz checks in a diff | CWE-862 |
-| Debug configuration | debug mode enabled in application code | CWE-489 |
-
-## Evaluation model
-
-Each finding records evidence, severity, confidence, CWE, line number, and a deterministic risk score. The replay report measures:
-
-- finding precision / recall against labeled synthetic diffs;
-- duplicate suppression rate;
-- high-risk acceptance rate;
-- remediation and verification rate;
-- mean findings per PR as an analyst/developer-friction proxy.
-
-## Quick start
+## Run it
 
 ```bash
 python -m venv .venv
@@ -61,12 +82,14 @@ codesentinel --input sample_data/pr_diff.txt
 python -m unittest discover -s tests -v
 ```
 
-Optional dashboard:
+### Product dashboard
 
 ```bash
 python -m pip install streamlit
 streamlit run dashboard/app.py
 ```
+
+The dashboard includes a product-style overview, security posture, severity/CWE views, validated-finding queue, remediation funnel, and evidence drill-down.
 
 ## Repository map
 
@@ -74,19 +97,19 @@ streamlit run dashboard/app.py
 src/codesentinel/
 ├── models.py       typed finding + lifecycle records
 ├── rules.py        explainable AppSec detectors
-├── validator.py    dedupe, confidence and contextual prioritization
-├── lifecycle.py    disposition / remediation / verification state
+├── validator.py    dedupe, confidence + contextual prioritization
+├── lifecycle.py    disposition / remediation / verification
 ├── evaluation.py   replay metrics
 └── cli.py          reproducible command-line review
 sample_data/        synthetic PR diff + labels
-reports/            checked-in baseline report
-assets/             architecture + dashboard preview
-dashboard/          Streamlit investigation surface
-tests/              detector and lifecycle invariants
+reports/            checked-in measured baseline
+assets/             product + architecture visuals
+dashboard/          product-style Streamlit review surface
+tests/              detector + lifecycle invariants
 ```
 
 ## Production evolution
 
-A production version would add GitHub App webhooks, language-aware AST/data-flow analysis, dependency and secret-scanner adapters, an LLM validator behind strict evidence contracts, SARIF output, policy-as-code release gates, code-owner routing, and telemetry linking findings to accepted fixes and verified closure.
+A production deployment would add GitHub App webhooks, language-aware AST/data-flow analysis, dependency and secret-scanner adapters, SARIF, evidence-constrained LLM validation, policy-as-code release gates, code-owner routing, analyst/developer dispositions, and telemetry linking findings to **accepted fixes and verified closure**.
 
-> **Safety boundary:** this repository is a defensive code-review system. It reports security weaknesses and remediation-oriented evidence; it does not automate exploitation.
+> **Safety boundary:** CodeSentinel is defensive code-review tooling. It identifies weaknesses and remediation evidence; it does not automate exploitation.
